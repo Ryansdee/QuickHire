@@ -1,0 +1,9 @@
+[
+    {
+      "origin": ["http://localhost:3001"],
+      "responseHeader": ["Content-Type"],
+      "method": ["GET", "POST", "PUT", "DELETE"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  

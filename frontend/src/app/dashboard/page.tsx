@@ -1,17 +1,34 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 import Link from 'next/link';
 import { HiOutlineDocumentText, HiOutlineBriefcase, HiOutlinePlusCircle, HiOutlinePhone, HiOutlineSearch } from 'react-icons/hi';
+import { useUser } from '../../context/UserContext'; // Contexte utilisateur
 
 const Dashboard = () => {
+  const { user, setUser } = useUser(); // Accède à l'utilisateur connecté et à la fonction setUser
   const router = useRouter();
 
-  const handleLogout = () => {
-    // Logique de déconnexion ici, par exemple effacer un token ou rediriger
-    router.push('/signin'); // Redirige vers la page de connexion après déconnexion
-  };
+  // Vérifier si un utilisateur est stocké dans localStorage et le charger dans le contexte
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData); // Met à jour l'utilisateur dans le contexte
+    } else {
+      // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+      router.push('/signin');
+    }
+  }, [setUser, router]);
+
+  // Si l'utilisateur n'est pas connecté, le rediriger vers /signin
+  if (!user) {
+    return null; // Ne rien rendre si l'utilisateur n'est pas connecté
+  }
+
+  const firstN = user.firstName.split(' ')[0];
 
   return (
     <>
@@ -23,7 +40,7 @@ const Dashboard = () => {
 
       <section className="py-20 bg-gray-100">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-4xl font-extrabold text-gray-800 mb-6 text-center">Bienvenue sur votre tableau de bord</h2>
+          <h2 className="text-4xl font-extrabold text-gray-800 mb-6 text-center">Bienvenue {firstN} sur votre tableau de bord</h2>
           <p className="text-xl text-gray-600 mb-12 text-center">
             Gérez votre profil, vos candidatures et vos offres d'emploi en toute simplicité.
           </p>
@@ -88,16 +105,6 @@ const Dashboard = () => {
                 <span>Trier les CV</span>
               </div>
             </Link>
-          </div>
-
-          {/* Logout Button */}
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleLogout}
-              className="px-8 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
-            >
-              Se déconnecter
-            </button>
           </div>
         </div>
       </section>

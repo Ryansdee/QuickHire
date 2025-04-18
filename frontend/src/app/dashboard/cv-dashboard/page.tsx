@@ -39,9 +39,9 @@ const CvDashboard = () => {
       console.log(`Suppression du fichier: ${file}`);
 
       // Appel à l'API pour supprimer le fichier côté backend (passer le nom du fichier)
-      const res = await fetch(`/api/delete-file`, {
-        method: 'DELETE',
-        body: JSON.stringify({ fileName: file }),  // On envoie le nom du fichier
+      const res = await fetch('/api/delete-file', {
+        method: 'POST',
+        body: JSON.stringify({ filePath: `uploads/${file}` }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -55,7 +55,7 @@ const CvDashboard = () => {
 
       console.log(`Fichier ${file} supprimé avec succès`);
       // Si la suppression sur le backend a réussi, supprimer localement
-      setCvFiles((prevFiles) => prevFiles.filter((f) => f.name !== file));  // On compare les noms des fichiers
+      setCvFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));  // On compare les noms des fichiers
     } catch (error) {
       // Log de l'erreur
       console.error('Erreur lors de la suppression du fichier:', error);

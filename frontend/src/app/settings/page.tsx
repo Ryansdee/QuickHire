@@ -86,20 +86,6 @@ const Settings = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700">
-              Nom
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              className="w-full p-3 mt-1 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-600"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
               Email
             </label>

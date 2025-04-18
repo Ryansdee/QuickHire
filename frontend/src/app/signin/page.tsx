@@ -25,8 +25,13 @@ const SignIn = () => {
       
       // Si l'utilisateur est connecté, on récupère et on met à jour son prénom dans le contexte
       if (currentUser) {
-        // Met à jour le prénom de l'utilisateur dans le contexte UserContext
-        setUser({ firstName: currentUser.displayName || 'Utilisateur' });
+        const userData = { firstName: currentUser.displayName || 'Utilisateur', email: currentUser.email };
+        
+        // Sauvegarde l'utilisateur dans localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Met à jour l'utilisateur dans le contexte
+        setUser(userData);
       }
 
       // Redirection vers le tableau de bord après connexion réussie

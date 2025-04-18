@@ -28,12 +28,8 @@ const Profile = () => {
         
         {/* Affichage des informations de l'utilisateur */}
         <div className="mb-4">
-          <p className="text-sm font-semibold text-gray-700">Prénom :</p>
+          <p className="text-sm font-semibold text-gray-700">Nom complet :</p>
           <p className="text-gray-600">{user.firstName}</p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm font-semibold text-gray-700">Nom :</p>
-          <p className="text-gray-600">{user.lastName}</p>
         </div>
         <div className="mb-4">
           <p className="text-sm font-semibold text-gray-700">Email :</p>
@@ -41,7 +37,7 @@ const Profile = () => {
         </div>
         <div className="mb-6">
           <p className="text-sm font-semibold text-gray-700">Numéro de téléphone :</p>
-          <p className="text-gray-600">{user.phoneNumber || 'Non renseigné'}</p>
+          <p className="text-gray-600">{user.phoneNumber || "Non enregistré"}</p>
         </div>
 
         {/* Lien vers la page de paramètres */}

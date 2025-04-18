@@ -31,14 +31,17 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  
+    const firstN = user ? user.firstName.split(' ')[0] : '';
 
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-800">
           <Link href="/" className="px-6 py-2 bg-transparent text-gray-800 rounded-lg hover:bg-transparent transition bouton">
-          QuickHire
-          </Link></h1>
+            QuickHire
+          </Link>
+        </h1>
         <div className="space-x-6">
           {/* Si l'utilisateur est connecté, on affiche son prénom et un menu déroulant */}
           {user ? (
@@ -47,14 +50,14 @@ const Navbar = () => {
                 onClick={toggleDropdown}
                 className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition bouton"
               >
-                Bonjour, {user.firstName}!
+                Bonjour, {firstN}!
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg w-48">
                   <ul>
                     <li>
                       <Link href="/dashboard" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                      Dashboard
+                        Dashboard
                       </Link>
                     </li>
                     <li>
@@ -104,12 +107,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
       <head />
-      <body>
+      <body className="min-h-screen flex flex-col">
         <UserProvider>
           {/* Navbar avec affichage du prénom ou liens de connexion */}
           <Navbar />
           {/* Contenu principal des pages */}
-          <main>{children}</main>
+          <main className="flex-grow">{children}</main>
           {/* Footer */}
           <footer className="bg-gray-800 py-6 text-center text-white">
             <p>&copy; 2025 QuickHire. Tous droits réservés.</p>

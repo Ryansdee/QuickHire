@@ -36,14 +36,19 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="mx-auto px-4 py-4 flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-800">
           <Link href="/" className="px-6 py-2 bg-transparent text-gray-800 rounded-lg hover:bg-transparent transition bouton">
             QuickHire
           </Link>
+          <Link href="/" className="px-1 py-2 bg-transparent text-gray-600 text-base hover:border-b-2 border-gray-500 transition duration-400 ease-in-out current">
+          Page d'accueil
+          </Link>
+          <Link href="/testimonials" className="px-1 py-2 bg-transparent text-gray-600 text-base hover:border-b-2 border-gray-500 transition duration-400 ease-in-out">
+          Avis sur l'entreprise
+          </Link>
         </h1>
         <div className="space-x-6">
-          {/* Si l'utilisateur est connecté, on affiche son prénom et un menu déroulant */}
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
@@ -80,7 +85,6 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            // Si l'utilisateur n'est pas connecté, on affiche les liens d'inscription et de connexion
             <>
               <Link
                 href="/signup"

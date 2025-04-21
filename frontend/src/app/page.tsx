@@ -46,15 +46,36 @@ const LandingPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* Hero section */}
       <section className="bg-gradient-to-r from-gray-50 to-gray-200 py-20">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-extrabold text-gray-800 mb-6">Accélérez vos recrutements et trouvez le talent idéal en un clic !</h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Rejoignez une plateforme innovante qui simplifie vos processus de recrutement et vous aide à trouver des talents rapidement.
-          </p>
+        <div className="max-w-4xl mx-auto px-4 text-center">
+
+          <form className="bg-white shadow-md rounded-lg p-6 flex flex-col sm:flex-row gap-4 justify-center items-center max-w-3xl mx-auto">
+            <input
+              type="text"
+              placeholder="Métier, mots-clés, entreprise"
+              className="w-full sm:w-1/2 px-4 py-3 border border-gray-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            
+            <input
+              type="text"
+              placeholder="Lieu (ex: Paris, Bruxelles...)"
+              className="w-full sm:w-1/3 px-4 py-3 border border-gray-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+
+            {/* Bouton de recherche */}
+            <button
+              type="submit"
+              className="w-full sm:w-auto bg-indigo-600 text-white font-medium px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
+            >
+              Rechercher
+            </button>
+          </form>
+        <p className="text-xl py-5 text-gray-600 mb-10">
+          Trouvez le job qui vous correspond. Recherchez par mot-clé ou localisation.
+        </p>
         </div>
       </section>
+
 
       {/* Job Posts Preview */}
       <section className="py-20 bg-white">

@@ -1,0 +1,23 @@
+{
+  "frontend": {
+    "title": "Test de développement Frontend (HTML/React)",
+    "description": "Construisez une interface simple en HTML/CSS/React...",
+    "placeholder": "Écrivez votre code ici..."
+  },
+  "backend": {
+    "title": "Test de développement Backend (Node.js)",
+    "description": "Écrivez une fonction qui résout ce problème...",
+    "placeholder": "Écrivez votre code ici..."
+  },
+  "développeur_frontend": {
+    "title": "Test Frontend",
+    "description": "Créez un composant en React/html,js avec un bouton qui affiche un message au clic.",
+    "placeholder": "Écrivez ici...",
+    "reactCode": "<button onClick={() => alert('Bonjour !')}>Cliquez-moi</button>",
+    "htmlCode": {
+      "html": "<button onClick='message' id='alert'>Cliquez-moi</button>",
+      "js": "function message() {document.getElementById('alert').innerHTML = 'Hello World';}"
+    },
+    "defaultCode": "Écrivez votre code ici..."
+  }
+}

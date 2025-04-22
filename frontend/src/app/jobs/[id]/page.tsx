@@ -46,9 +46,14 @@ const JobDetailPage = async ({ params }: { params: { id: string } }) => {
               <span key={index} className="inline-block px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-full">{tag}</span>
             ))}
           </div>
+          <div className="flex flex-wrap gap-2 mb-6">
+            {job.lang && job.lang.split(',').map((lang: string, index: number) => (
+              <span key={index} className="inline-block px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-full">{lang}</span>
+            ))}
+          </div>
 
           <div className="flex justify-center">
-            <Link href={`/test?name=${urlName}`} passHref>
+            <Link href={`/test?name=${urlName}&lang=${job.lang}`} passHref>
               <button className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors cursor-pointer">
                 Postuler maintenant
               </button>

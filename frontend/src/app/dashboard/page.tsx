@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Head from 'next/head';
-import Link from 'next/link';
-import { HiOutlineDocumentText, HiOutlineBriefcase, HiOutlinePlusCircle, HiOutlinePhone, HiOutlineSearch } from 'react-icons/hi';
 import { useUser } from '../../context/UserContext'; // Contexte utilisateur
+import { HiOutlineDocumentText, HiOutlineBriefcase } from 'react-icons/hi';
 
 const Dashboard = () => {
   const { user, setUser } = useUser(); // Accède à l'utilisateur connecté et à la fonction setUser
   const router = useRouter();
+  const [responses, setResponses] = useState([]); // État pour stocker les réponses
+  const [loading, setLoading] = useState(true); // Indicateur de chargement
 
   // Vérifier si un utilisateur est stocké dans localStorage et le charger dans le contexte
   useEffect(() => {
@@ -22,6 +23,32 @@ const Dashboard = () => {
       router.push('/signin');
     }
   }, [setUser, router]);
+
+  // Charger les réponses de l'employeur lorsqu'un utilisateur est connecté
+  useEffect(() => {
+    if (user) {
+      console.log('Utilisateur connecté:', user); // Déboguer l'objet utilisateur
+
+      // Vérifier si l'ID de l'utilisateur est défini
+      if (user.id) {
+        const fetchResponses = async () => {
+          try {
+            const response = await fetch(`/api/response?employerId=${user.id}`);
+            const data = await response.json();
+            setResponses(data); // Met à jour les réponses dans l'état
+          } catch (error) {
+            console.error('Erreur lors du chargement des réponses:', error);
+          } finally {
+            setLoading(false); // Fin du chargement
+          }
+        };
+
+        fetchResponses();
+      } else {
+        console.error('L\'ID de l\'utilisateur est indéfini');
+      }
+    }
+  }, [user]);
 
   // Si l'utilisateur n'est pas connecté, le rediriger vers /signin
   if (!user) {
@@ -47,64 +74,39 @@ const Dashboard = () => {
 
           {/* Section des cartes */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {/* Autres cartes */}
             <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out">
               <div className="flex items-center space-x-4">
                 <HiOutlineDocumentText className="text-indigo-500 text-3xl" />
                 <div>
-                  <h4 className="text-xl font-semibold text-gray-800">Candidatures en attente</h4>
-                  <p className="text-gray-600">Vous avez 3 candidatures en attente d'approbation.</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out">
-              <div className="flex items-center space-x-4">
-                <HiOutlineBriefcase className="text-green-500 text-3xl" />
-                <div>
-                  <h4 className="text-xl font-semibold text-gray-800">Offres d'emploi</h4>
-                  <p className="text-gray-600">Vous avez 5 offres d'emploi en cours de publication.</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out">
-              <div className="flex items-center space-x-4">
-                <HiOutlinePhone className="text-blue-500 text-3xl" />
-                <div>
-                  <h4 className="text-xl font-semibold text-gray-800">Profil</h4>
-                  <p className="text-gray-600">Complétez votre profil pour obtenir plus de visibilité auprès des recruteurs.</p>
+                  <h4 className="text-xl font-semibold text-gray-800">Réponses reçues</h4>
+                  {loading ? (
+                    <p className="text-gray-600">Chargement des réponses...</p>
+                  ) : (
+                    <p className="text-gray-600">Vous avez {responses.length} réponses à vos offres d'emploi.</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Actions rapides */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Link
-              href="/dashboard/create-job"
-              className="bg-green-500 text-white rounded-lg p-6 flex items-center justify-between hover:bg-green-600 transition duration-300 ease-in-out"
-            >
-              <div className="flex items-center space-x-4">
-                <HiOutlinePlusCircle className="text-2xl" />
-                <span>Créer une offre d'emploi</span>
-              </div>
-            </Link>
-            <Link
-              href="/dashboard/upload-cv"
-              className="bg-blue-500 text-white rounded-lg p-6 flex items-center justify-between hover:bg-blue-600 transition duration-300 ease-in-out"
-            >
-              <div className="flex items-center space-x-4">
-                <HiOutlineSearch className="text-2xl" />
-                <span>Télécharger des CV</span>
-              </div>
-            </Link>
-            <Link
-              href="/dashboard/cv-dashboard"
-              className="bg-yellow-500 text-white rounded-lg p-6 flex items-center justify-between hover:bg-yellow-600 transition duration-300 ease-in-out"
-            >
-              <div className="flex items-center space-x-4">
-                <HiOutlineSearch className="text-2xl" />
-                <span>Trier les CV</span>
-              </div>
-            </Link>
+          {/* Affichage des réponses */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-12">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-6">Réponses aux offres :</h3>
+            {responses.length > 0 ? (
+              <ul>
+                {responses.map((response) => (
+                  <li key={response.id} className="border-b py-4">
+                    <h4 className="font-semibold text-gray-800">{response.jobTitle}</h4>
+                    <p className="text-gray-600">Candidat: {response.candidate_id}</p>
+                    <p className="text-gray-600">Code soumis: {response.code}</p>
+                    <p className="text-gray-600">Statut: {response.status}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-600">Aucune réponse reçue pour vos offres d'emploi.</p>
+            )}
           </div>
         </div>
       </section>

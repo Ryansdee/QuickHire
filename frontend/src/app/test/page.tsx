@@ -2,165 +2,196 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import tests from './tests.json'; // Le JSON de test
-import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
+import testsData from './tests.json';
+
 
 type TestType = {
+  id: string;
   title: string;
   description: string;
+  languages: string[];
   placeholder: string;
-  defaultCode?: string;
-  reactCode?: string;   // Code spécifique React (si nécessaire)
-  htmlCode?: { html: string; js: string };  // Code spécifique HTML/JS (si nécessaire)
-  nodeCode?: string;  // Code spécifique Node.js (si nécessaire)
+  defaultCode: string;
+  examples: Record<string, string>;
+  correctAnswers: string[];
+};
+
+type CandidateSubmission = {
+  candidateId: string;
+  code: string;
 };
 
 const TestPage = () => {
   const searchParams = useSearchParams();
   const [testData, setTestData] = useState<TestType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [code, setCode] = useState<string>('');  // Code à éditer
-  const [language, setLanguage] = useState<string>('');  // Langage sélectionné
-  const [timeLeft, setTimeLeft] = useState<number>(900); // 15 minutes en secondes
-  const [isTimeUp, setIsTimeUp] = useState<boolean>(false); // Si le temps est écoulé
+  const [code, setCode] = useState('');
+  const [isTimeUp, setIsTimeUp] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
+  const [submissions, setSubmissions] = useState<CandidateSubmission[]>([]); // État pour stocker les soumissions des candidats
+  const [selectedSubmission, setSelectedSubmission] = useState<CandidateSubmission | null>(null); // Soumission sélectionnée par l'auteur
 
   useEffect(() => {
-    const type = searchParams.get('name');
-    const decodedType = type ? decodeURIComponent(type) : '';
+    const nameParam = searchParams.get('name');
+    const langParam = searchParams.get('lang');
 
-    const foundTest = decodedType && (tests as Record<string, TestType>)[decodedType];
-    if (foundTest) {
-      setTestData(foundTest);
+    const decodedName = nameParam ? decodeURIComponent(nameParam).toLowerCase() : '';
+    const decodedLang = langParam ? decodeURIComponent(langParam).toLowerCase() : '';
 
-      // Initialisation du code en fonction du type de test
-      if (foundTest.reactCode) {
-        setCode(foundTest.reactCode);
-        setLanguage('react');
-      } else if (foundTest.htmlCode) {
-        setCode(foundTest.htmlCode.html + '\n' + foundTest.htmlCode.js);
-        setLanguage('html');
-      } else if (foundTest.nodeCode) {
-        setCode(foundTest.nodeCode);
-        setLanguage('node');
-      } else {
-        setCode(foundTest.defaultCode || '<h1>Hello World</h1>');
-        setLanguage('html');
-      }
+    const allTests: TestType[] = (testsData as unknown as { tests: TestType[] }).tests;
+
+    let testId = '';
+    if (decodedName.includes('frontend')) testId = 'frontend';
+    else if (decodedName.includes('backend')) testId = 'backend';
+    else testId = decodedName;
+
+    const found = allTests.find((t) => t.id === testId);
+
+    if (found) {
+      setTestData(found);
+
+      const selectedLang = found.languages && found.languages.includes(decodedLang)
+        ? decodedLang
+        : found.languages[0];
+
+      const initialCode = found.examples[selectedLang] || found.defaultCode || '';
+      setCode(initialCode);
+    } else {
+      setTestData(null);
     }
 
-    setIsLoading(false);
-
-    // Timer setup (15 minutes countdown)
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
           clearInterval(timer);
           setIsTimeUp(true);
         }
-        return prevTime - 1;
+        return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
   }, [searchParams]);
 
-  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedLanguage = event.target.value;
-    setLanguage(selectedLanguage);
+// Extrait du code côté client dans `page.tsx`
+const handleSubmit = async (candidateId: string) => {
+  if (!testData) return;
 
-    // Modifier le code en fonction du langage choisi
-    if (testData) {
-      if (selectedLanguage === 'react' && testData.reactCode) {
-        setCode(testData.reactCode);
-      } else if (selectedLanguage === 'html' && testData.htmlCode) {
-        setCode(testData.htmlCode.html + '\n' + testData.htmlCode.js);
-      } else if (selectedLanguage === 'node' && testData.nodeCode) {
-        setCode(testData.nodeCode);
-      } else {
-        setCode(testData.defaultCode || '<h1>Hello World</h1>');
-      }
+  const submission = {
+    candidateId,
+    code: code.trim(),
+  };
+
+  try {
+    const response = await fetch('/api/response', {
+      method: 'POST',  // Utiliser la méthode POST
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        testId: testData.id,
+        candidateId,
+        code: submission.code,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erreur lors de la soumission:', errorData.error);
+      return;
     }
+
+    const data = await response.json();
+    console.log('Réponse soumise avec succès:', data);
+
+    // Ajouter la soumission dans l'état ou effectuer d'autres actions
+    setSubmissions((prevSubmissions) => [...prevSubmissions, submission]);
+    setIsTimeUp(true);
+  } catch (error) {
+    console.error('Erreur lors de la soumission de la réponse:', error);
+  }
+};
+
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
   };
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  const handleSelection = (submission: CandidateSubmission) => {
+    setSelectedSubmission(submission); // L'auteur sélectionne la proposition
   };
 
-  const handleSubmitTest = () => {
-    // Logique de soumission de test et de notation (par exemple, vérifier si le code est valide)
-    alert('Test soumis et noté !');
-  };
-
-  if (isLoading) return <p>Chargement...</p>;
+  if (!testData) return <p className="text-center py-10">Chargement...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
-        {/* Instruction Card */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{testData?.title}</h2>
-          <p className="text-gray-900">{testData?.description}</p>
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{testData.title}</h1>
+          <p className="text-gray-700">{testData.description}</p>
         </div>
 
-        {/* IDE + Preview */}
-        <div className="bg-white shadow-md rounded-lg p-6 space-y-4">
-          {/* Langage Select */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-900" htmlFor="language">
-              Choisissez un langage
+        <div className="bg-white p-4 rounded-lg shadow space-y-4">
+          <div>
+            <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
+              Code
             </label>
-            <select
-              id="language"
-              value={language}
-              onChange={handleLanguageChange}
-              className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            <textarea
+              id="code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder={testData.placeholder}
               disabled={isTimeUp}
-            >
-              <option value="html">HTML / JavaScript</option>
-              <option value="react">React</option>
-              <option value="node">Node.js</option>
-            </select>
+              rows={12}
+              className="w-full font-mono p-3 rounded-md border text-gray-500 border-gray-300 bg-gray-50"
+            />
           </div>
 
-          {/* Timer Display */}
-          <div className="mb-4">
-            <p className="text-lg font-medium text-gray-900">
-              Temps restant: {isTimeUp ? 'Temps écoulé' : formatTime(timeLeft)}
-            </p>
-          </div>
-
-          {/* Code Editor */}
-          <LiveProvider code={code} noInline={true}>
-            <div className="mb-4">
-              <LiveEditor
-                onChange={(newCode) => setCode(newCode)}
-                className="bg-gray-100 rounded-md p-2 text-sm font-mono h-100 overflow-auto"
-                aria-placeholder={testData?.placeholder || 'Écrivez votre code ici...'}
-                disabled={isTimeUp}
-              />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-lg font-medium text-gray-700">
+              Temps restant : {isTimeUp ? 'Temps écoulé' : formatTime(timeLeft)}
             </div>
 
-            {/* Preview section */}
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">Aperçu</h3>
-              <div className="p-4 border rounded-md bg-gray-50 text-gray-500">
-                <LivePreview />
-              </div>
-            </div>
-          </LiveProvider>
-
-          {/* Submit Button */}
-          <div className="mt-4">
             <button
-              onClick={handleSubmitTest}
-              className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md disabled:bg-gray-400"
+              onClick={() => handleSubmit("candidate1")} // L'ID du candidat peut être dynamique
               disabled={isTimeUp}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md disabled:bg-gray-400"
             >
-              {isTimeUp ? 'Test soumis automatiquement' : 'Soumettre le test'}
+              {isTimeUp ? 'Test verrouillé' : 'Soumettre le test'}
             </button>
           </div>
+
+          {/* Affichage des soumissions des candidats */}
+          {isTimeUp && (
+            <div className="mt-6">
+              <h2 className="text-2xl font-bold text-gray-800">Propositions des candidats :</h2>
+              <ul className="mt-4 space-y-4">
+                {submissions.map((submission, index) => (
+                  <li key={index} className="p-4 bg-gray-50 border rounded-md">
+                    <div className="font-semibold text-gray-700">
+                      Candidat : {submission.candidateId}
+                    </div>
+                    <pre className="mt-2 whitespace-pre-wrap">{submission.code}</pre>
+                    <button
+                      onClick={() => handleSelection(submission)}
+                      className="mt-2 text-blue-600 hover:underline"
+                    >
+                      Sélectionner cette proposition
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Affichage de la proposition sélectionnée par l'auteur */}
+          {selectedSubmission && (
+            <div className="mt-4 p-4 bg-green-100 text-green-800 rounded">
+              <h3 className="font-semibold">Proposition sélectionnée :</h3>
+              <pre className="mt-2 whitespace-pre-wrap">{selectedSubmission.code}</pre>
+            </div>
+          )}
         </div>
       </div>
     </div>

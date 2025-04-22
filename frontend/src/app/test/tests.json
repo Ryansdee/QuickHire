@@ -1,23 +1,88 @@
 {
-  "frontend": {
-    "title": "Test de développement Frontend (HTML/React)",
-    "description": "Construisez une interface simple en HTML/CSS/React...",
-    "placeholder": "Écrivez votre code ici..."
-  },
-  "backend": {
-    "title": "Test de développement Backend (Node.js)",
-    "description": "Écrivez une fonction qui résout ce problème...",
-    "placeholder": "Écrivez votre code ici..."
-  },
-  "développeur_frontend": {
-    "title": "Test Frontend",
-    "description": "Créez un composant en React/html,js avec un bouton qui affiche un message au clic.",
-    "placeholder": "Écrivez ici...",
-    "reactCode": "<button onClick={() => alert('Bonjour !')}>Cliquez-moi</button>",
-    "htmlCode": {
-      "html": "<button onClick='message' id='alert'>Cliquez-moi</button>",
-      "js": "function message() {document.getElementById('alert').innerHTML = 'Hello World';}"
+  "tests": [
+    {
+      "id": "frontend",
+      "title": "Test de développement Frontend (HTML/CSS/React)",
+      "description": "Construisez une interface simple en HTML, CSS, et React. Vous devez créer une page interactive avec un bouton qui affiche un message lorsqu'il est cliqué. Utilisez React pour gérer l'état et l'interactivité.",
+      "placeholder": "Écrivez votre code ici...",
+      "languages": ["react", "html", "css"],
+      "defaultCode": "<h1>Hello World</h1>",
+      "examples": {
+        "react": "<button onClick={() => alert('Bonjour !')}>Cliquez-moi</button>",
+        "html": "<button onClick='message' id='alert'>Cliquez-moi</button>\nfunction message() {document.getElementById('alert').innerHTML = 'Hello World';}",
+        "css": "button { background-color: blue; color: white; font-size: 16px; padding: 10px 20px; border-radius: 5px; cursor: pointer; }",
+        "node": "console.log('Hello World');"
+      },
+      "correctAnswers": [
+        "<button onClick={() => alert('Bonjour !')}>Cliquez-moi</button>",
+        "<button onClick={() => alert('Hello')}>Click me</button>",
+        "<h1>Hello world !</h1>",
+        "<button onClick={() => alert('Coucou !')}>Clique</button>",
+        "<button onClick='message' id='alert'>Cliquez-moi</button>\nfunction message() {document.getElementById('alert').innerHTML = 'Hello World';}",
+        "<div class='container'><button onClick={() => alert('React is awesome!')}>Click me</button></div>"
+      ],
+      "instructions": {
+        "task": "Vous devez implémenter un bouton qui affiche un message dans une fenêtre contextuelle lorsque l'utilisateur clique dessus. Le code doit être écrit en React, mais vous pouvez également fournir une solution HTML et CSS simple. Utilisez le framework React pour gérer l'interaction et l'état.",
+        "criteria": [
+          "Le bouton doit afficher un message lors du clic.",
+          "Le code React doit être propre et bien structuré.",
+          "Le style du bouton doit être professionnel et agréable."
+        ]
+      },
+      "difficulty": "intermediate",
+      "tags": ["react", "html", "css", "frontend", "interactive"]
     },
-    "defaultCode": "Écrivez votre code ici..."
-  }
+    {
+      "id": "backend",
+      "title": "Test de développement Backend (Node.js)",
+      "description": "Écrivez une fonction en Node.js qui résout un problème spécifique. La fonction doit être optimisée pour gérer des cas d'erreur et offrir une réponse rapide.",
+      "placeholder": "Écrivez votre code ici...",
+      "languages": ["node"],
+      "defaultCode": "// Votre code ici",
+      "examples": {
+        "node": "const solve = (input) => { return input * 2; };"
+      },
+      "correctAnswers": [
+        "const solve = (input) => { return input * 2; };",
+        "const solve = (input) => { if (input <= 0) return 'Erreur'; return input * 2; };"
+      ],
+      "instructions": {
+        "task": "Écrivez une fonction `solve()` en Node.js qui prend un nombre en entrée et retourne son double. La fonction doit également gérer les entrées invalides (par exemple, les nombres négatifs ou non numériques).",
+        "criteria": [
+          "Le code doit être fonctionnel et renvoyer la bonne sortie.",
+          "Les cas d'erreur doivent être correctement gérés.",
+          "Le code doit être clair et efficace."
+        ]
+      },
+      "difficulty": "easy",
+      "tags": ["node", "backend", "algorithms"]
+    },
+    {
+      "id": "advanced-frontend",
+      "title": "Test avancé de développement Frontend (Vue.js/React/HTML/CSS)",
+      "description": "Construisez une application frontend complète qui récupère des données depuis une API et les affiche de manière dynamique avec une interface utilisateur réactive. Vous utiliserez Vue.js ou React pour ce test.",
+      "placeholder": "Écrivez votre code ici...",
+      "languages": ["react", "vue", "html", "css"],
+      "defaultCode": "import React, { useState, useEffect } from 'react'; const App = () => { return <h1>Chargement des données...</h1>; };",
+      "examples": {
+        "react": "<button onClick={() => alert('Chargement des données...')}>Cliquez-moi</button>",
+        "vue": "<template><button @click='alertMessage'>Cliquez-moi</button></template><script>export default { methods: { alertMessage() { alert('Hello Vue.js!'); } }}</script>",
+        "html": "<div id='app'></div><script src='https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js'></script><script>new Vue({ el: '#app', data: { message: 'Hello Vue!' } });</script>"
+      },
+      "correctAnswers": [
+        "<button onClick={() => alert('Données récupérées')}>Cliquez-moi</button>",
+        "<template><div><button @click='fetchData'>Récupérer les données</button><ul><li v-for='item in items' :key='item.id'>{{ item.name }}</li></ul></div></template><script>export default { data() { return { items: [] }; }, methods: { fetchData() { fetch('https://api.example.com/data').then(response => response.json()).then(data => { this.items = data; }); } } };</script>"
+      ],
+      "instructions": {
+        "task": "Construisez une interface réactive qui récupère des données depuis une API publique et les affiche dans une liste. Vous pouvez choisir d'utiliser React ou Vue.js. Vous devez également gérer le cas où aucune donnée n'est disponible et afficher un message d'erreur si nécessaire.",
+        "criteria": [
+          "L'application doit être réactive et récupérer les données depuis l'API.",
+          "Les erreurs doivent être gérées correctement si l'API échoue.",
+          "L'interface utilisateur doit être agréable et intuitive."
+        ]
+      },
+      "difficulty": "advanced",
+      "tags": ["react", "vue", "html", "css", "frontend", "api", "advanced"]
+    }
+  ]
 }

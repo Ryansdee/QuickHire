@@ -41,10 +41,13 @@ const LandingPage = () => {
 
   return (
     <>
-      <Head>
-        <meta name="description" content="Plateforme de recrutement rapide avec QuickHire" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+    <Head>
+      <title>QuickHire - Trouvez votre talent idéal</title>
+      <meta name="description" content="Plateforme de recrutement rapide avec QuickHire" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="icon" href="/favicon.png" type="image/png" />
+    </Head>
+
 
       <section className="bg-gradient-to-r from-gray-50 to-gray-200 py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -53,19 +56,19 @@ const LandingPage = () => {
             <input
               type="text"
               placeholder="Métier, mots-clés, entreprise"
-              className="w-full sm:w-1/2 px-4 py-3 border border-gray-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full sm:w-1/2 px-4 py-3 border border-green-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
             
             <input
               type="text"
               placeholder="Lieu (ex: Paris, Bruxelles...)"
-              className="w-full sm:w-1/3 px-4 py-3 border border-gray-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full sm:w-1/3 px-4 py-3 border border-green-500 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
 
             {/* Bouton de recherche */}
             <button
               type="submit"
-              className="w-full sm:w-auto bg-indigo-600 text-white font-medium px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors"
+              className="w-full sm:w-auto bg-green-600 text-white font-medium px-6 py-3 rounded-md hover:bg-green-700 transition-colors cursor-pointer"
             >
               Rechercher
             </button>
@@ -93,14 +96,14 @@ const LandingPage = () => {
                   key={job.id}
                   className="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-lg transition"
                 >
-                  <h4 className="text-xl font-semibold text-indigo-600 mb-2">{job.jobTitle}</h4>
+                  <h4 className="text-xl font-semibold text-green-600 mb-2">{job.jobTitle}</h4>
                   <p className="text-gray-700 font-medium">Localisation : {job.location}</p>
                   <p className="text-gray-700" style={{ fontSize: 12, fontStyle: 'italic', textDecoration: 'underline' }}>
                     {job.company}
                   </p>
                   <Link
                     href={`/jobs/${job.id}`}
-                    className="text-indigo-500 hover:underline mt-4 block"
+                    className="text-green-500 hover:underline mt-4 block"
                   >
                     Voir plus
                   </Link>

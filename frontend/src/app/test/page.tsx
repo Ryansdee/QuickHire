@@ -1,11 +1,10 @@
-// src/components/TestPage.tsx
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import testsData from './tests.json';
 import './test.css';
+import Editor from "@monaco-editor/react";
 
 type TestType = {
   id: string;
@@ -32,34 +31,53 @@ const TestPage = () => {
   const [code, setCode] = useState('');
   const [generatedQuestion, setGeneratedQuestion] = useState('');
   const [isTimeUp, setIsTimeUp] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(900);  // Initialement 15 minutes
-  const [submissions, setSubmissions] = useState<CandidateSubmission[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);  // L'ID de l'utilisateur actuel
+  const [hasSubmitted, setHasSubmitted] = useState(false); // 🆕
+  const [timeLeft, setTimeLeft] = useState(900);
   const [evaluationResult, setEvaluationResult] = useState<{ feedback: string, score: number } | null>(null);
+  
 
+  // Lancement du timer
+  useEffect(() => {
+    if (isTimeUp) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setHasSubmitted(true); // l'utilisateur a soumis
+          setIsTimeUp(true); // stop le timer si ce n'était pas déjà fait          
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isTimeUp]);
+
+  // Initialisation des données du test
   useEffect(() => {
     const nameParam = searchParams.get('name');
     const langParam = searchParams.get('lang');
-  
+
     const decodedName = nameParam ? decodeURIComponent(nameParam).toLowerCase() : '';
     const decodedLang = langParam ? decodeURIComponent(langParam).toLowerCase() : '';
-  
+
     const allTests: TestType[] = (testsData as unknown as { tests: TestType[] }).tests;
-  
+
     let testId = '';
     if (decodedName.includes('frontend')) testId = 'frontend';
     else if (decodedName.includes('backend')) testId = 'backend';
     else testId = decodedName;
-  
+
     const found = allTests.find((t) => t.id === testId);
-  
+
     if (found) {
       setTestData(found);
       const selectedLang = found.languages.includes(decodedLang) ? decodedLang : found.languages[0];
       const initialCode = found.examples[selectedLang] || found.defaultCode || '';
       setCode(initialCode);
-  
-      // Appel API pour générer une question
+
       fetch(`/api/evaluate?name=${encodeURIComponent(nameParam || '')}&lang=${encodeURIComponent(langParam || '')}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,30 +88,23 @@ const TestPage = () => {
         }),
       })
         .then(async (res) => {
-          if (!res.ok) {
-            const text = await res.text();
-            console.error('Erreur API (text brut) :', text);
-            return;
-          }
           const data = await res.json();
-          if (data?.question) {
-            setGeneratedQuestion(data.question);
-          } else {
-            console.error('Réponse mal formatée de l’API:', data);
-          }
+          if (data?.question) setGeneratedQuestion(data.question);
         })
-        .catch((err) => console.error('Erreur fetch question:', err));
-  
-      // Vérifier l'utilisateur actuel
+        .catch(console.error);
+
       const userStored = localStorage.getItem('userId');
-      if (userStored) setUserId(userStored);
+      if (userStored) {
+        // Optionnel: setUserId(userStored);
+      }
     }
   }, [searchParams]);
 
   const handleSubmit = async () => {
     if (!code.trim()) return;
-    setIsTimeUp(true);
-  
+
+    setIsTimeUp(true); // stop timer
+
     try {
       const response = await fetch('/api/evaluate', {
         method: 'POST',
@@ -103,38 +114,63 @@ const TestPage = () => {
           code,
         }),
       });
-  
+
       const data = await response.json();
       if (data) {
         setEvaluationResult({
           feedback: data.feedback,
           score: data.score,
         });
-      } else {
-        console.error('Aucune donnée reçue après soumission.');
       }
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
     }
   };
-  
+
+  const formatTime = (seconds: number) => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec < 10 ? `0${sec}` : sec}`;
+  };
+
   return (
-    <div className="test-page">
-      <h1>Test: {testData?.title}</h1>
-      <p>{testData?.description}</p>
-      <div className="code-editor">
-        <textarea
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl text-gray-800 font-bold">{testData?.title}</h1>
+
+      <div className="bg-blue-50 p-4 rounded-lg">
+        <h2 className="font-semibold text-gray-600">Question Générée :</h2>
+        <p className="text-gray-600">{generatedQuestion}</p>
+      </div>
+
+      <div className="relative">
+        <Editor
+          height="400px"
+          defaultLanguage={testData?.languages[0] || 'javascript'}
           value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder={testData?.placeholder || 'Écrivez votre code ici...'}
+          theme="vs-dark"
+          onChange={(value) => setCode(value || '')}
         />
       </div>
-      <button onClick={handleSubmit} disabled={isTimeUp}>Soumettre</button>
-      {isTimeUp && <p>Le temps est écoulé !</p>}
+
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-500">
+          {isTimeUp ? 'Temps écoulé' : `Temps restant : ${formatTime(timeLeft)}`}
+        </p>
+        <button
+          onClick={handleSubmit}
+          className={`px-4 py-2 rounded text-white ${
+            (isTimeUp || hasSubmitted) ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+          }`}
+          disabled={isTimeUp || hasSubmitted}
+        >
+          Soumettre
+        </button>
+      </div>
+
       {evaluationResult && (
-        <div className="evaluation-result">
-          <p>Note: {evaluationResult.score}/10</p>
-          <p>Feedback: {evaluationResult.feedback}</p>
+        <div className="bg-green-100 p-4 rounded-md mt-4">
+          <p><strong>Note :</strong> {evaluationResult.score}/10</p>
+          <p><strong>Feedback :</strong> {evaluationResult.feedback}</p>
         </div>
       )}
     </div>

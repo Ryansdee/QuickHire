@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 
 // Initialisation de l'API GoogleGenAI
 const ai = new GoogleGenAI({
-  apiKey: 'AIzaSyCc5IXjDz2TuPQ70J2rIQ78qgO7e0J_i3w', // Assurez-vous que la clé API est correcte
+  apiKey: '', // Assurez-vous que la clé API est correcte
 });
 
 // Fonction pour générer une question courte d'exercice pratique

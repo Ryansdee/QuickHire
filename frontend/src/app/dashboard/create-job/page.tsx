@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '../../../context/UserContext' // 👈 Import du contexte utilisateur
 
 const CreateJob = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -14,10 +15,16 @@ const CreateJob = () => {
   const [tags, setTags] = useState('');
 
   const router = useRouter();
+  const { user } = useUser(); // 👈 Utilisation du contexte
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
+    if (!user) {
+      alert("Vous devez être connecté pour créer une offre.");
+      return;
+    }
+
     try {
       const response = await fetch('/api/jobs', {
         method: 'POST',
@@ -26,29 +33,28 @@ const CreateJob = () => {
         },
         body: JSON.stringify({
           jobTitle,
-          experienceYears,
           company,
+          experienceYears,
           skills,
           location,
           description,
           tags,
+          authorId: user.uid, // 👈 Envoi de l'UID Firebase
         }),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
-        console.log('Offre d\'emploi créée avec succès:', data);
-        router.push('/dashboard'); // Redirige après la création du job
+        console.log("Offre d'emploi créée avec succès:", data);
+        router.push('/dashboard');
       } else {
         throw new Error(data.error || 'Erreur inconnue');
       }
     } catch (error) {
-      console.error('Erreur lors de la création de l\'offre:', error);
-      alert('Erreur lors de la création de l\'offre: ' + error.message);
+      console.error("Erreur lors de la création de l'offre:", error);
+      alert("Erreur lors de la création de l'offre: " + (error instanceof Error ? error.message : String(error)));
     }
   };
-  
-  
 
   return (
     <div className="max-w mx-auto p-8 bg-white shadow-lg text-gray-600">
@@ -59,7 +65,7 @@ const CreateJob = () => {
           <input type="text" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} className="w-full p-2 border rounded" required />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-semibold">Company?</label>
+          <label className="block text-sm font-semibold">Nom de l'entreprise</label>
           <input type="text" value={company} onChange={(e) => setCompany(e.target.value)} className="w-full p-2 border rounded" required />
         </div>
         <div className="mb-4">

@@ -7,6 +7,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 // Crée un contexte pour l'utilisateur
 interface User {
   [x: string]: string;
+  uid: string;
   firstName: string;
 }
 
@@ -26,6 +27,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         // Vérifie si un prénom est disponible dans displayName
         setUser({
+          uid: firebaseUser.uid,
           firstName: firebaseUser.displayName || 'Utilisateur', // Si displayName n'est pas défini, affiche 'Utilisateur'
         });
       } else {

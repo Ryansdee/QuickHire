@@ -53,7 +53,7 @@ const JobDetailPage = async ({ params }: { params: { id: string } }) => {
           </div>
 
           <div className="flex justify-center">
-            <Link href={`/test?name=${urlName}&lang=${job.lang}`} passHref>
+            <Link href={`/test?id=${job.id}&name=${urlName}&lang=${job.lang}`} passHref>
               <button className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors cursor-pointer">
                 Postuler maintenant
               </button>
